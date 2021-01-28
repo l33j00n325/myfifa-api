@@ -14,6 +14,11 @@ Rails.application.routes.draw do
   constraints format: :json do
     get 'users/sync', to: 'users#sync'
 
+    scope :password, controller: 'password' do
+      post 'forgot', as: :forgot_password
+      patch 'reset', as: :reset_password
+    end
+
     resources :teams, shallow: true do
       resources :players do
         member do

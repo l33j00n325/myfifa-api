@@ -46,6 +46,8 @@ gem 'date_validator'
 # making cross-origin AJAX possible
 gem 'rack-cors'
 
+gem 'uuid'
+
 group :development, :test do
   gem 'byebug', platform: :mri
 

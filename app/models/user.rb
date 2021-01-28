@@ -54,4 +54,9 @@ class User < ApplicationRecord
   def set_default_bools
     self.admin ||= false
   end
+
+  def send_reset_password_instructions
+    token = set_reset_password_token
+    UsersMailer.reset_password_instructions(self, token).deliver_now
+  end
 end

@@ -8,5 +8,5 @@
 
 Doorkeeper::Application.create!(
   name: 'MyFIFA Manager',
-  redirect_uri: "https://myfifa.jooni.me/"
+  redirect_uri: Rails.application.config.action_mailer.default_url_options[:host]
 )
