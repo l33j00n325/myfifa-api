@@ -21,25 +21,9 @@ class PenaltyShootout < ApplicationRecord
 
   belongs_to :match
 
-  PERMITTED_ATTRIBUTES = %i[
-    home_score
-    away_score
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   validates :home_score, numericality: { only_integer: true }
   validates :away_score, numericality: { only_integer: true }
-  validate :drawn_match?
   validate :no_draw?
-
-  def drawn_match?
-    return if match.home_score == match.away_score
-
-    errors.add :match, 'Result must be a draw'
-  end
 
   def no_draw?
     return if home_score != away_score
@@ -47,5 +31,5 @@ class PenaltyShootout < ApplicationRecord
     errors.add :base, 'Penalty Shootout must have a winner'
   end
 
-  delegate :team, :home, :away, to: :match
+  delegate :team, to: :match
 end

@@ -24,14 +24,6 @@ class Squad < ApplicationRecord
 
   accepts_nested_attributes_for :squad_players
 
-  PERMITTED_ATTRIBUTES = %i[
-    name
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   validates :name, presence: true
   validates :squad_players, length: { is: 11 }
   validate :unique_positions?
@@ -59,11 +51,5 @@ class Squad < ApplicationRecord
     squad_players.includes(:player).select do |squad_player|
       squad_player.player.active?
     end
-  end
-
-  def as_json(options = {})
-    options[:include] ||= []
-    options[:include] += [:squad_players]
-    super
   end
 end

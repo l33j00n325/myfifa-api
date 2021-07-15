@@ -8,7 +8,7 @@ class RenameMatchScoreOverridesToScore < ActiveRecord::Migration[5.2]
       @matches.each do |match|
         match.update(
           home_score: match.goals.count { |goal| goal.home? ^ goal.own_goal? },
-          away_score: match.goals.count { |goal| goal.away? ^ goal.own_goal? }
+          away_score: match.goals.count { |goal| !goal.home? ^ goal.own_goal? }
         )
       end
     end

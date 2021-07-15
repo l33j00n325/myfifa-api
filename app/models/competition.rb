@@ -24,25 +24,10 @@ class Competition < ApplicationRecord
   belongs_to :team
   has_many :stages, dependent: :destroy
 
-  ATTR_ACCESSORS = %i[
-    preset_format
-    num_teams
-    num_teams_per_group
-    num_advances_from_group
-  ].freeze
-
-  attr_accessor(*ATTR_ACCESSORS)
-
-  PERMITTED_ATTRIBUTES = %i[
-    season
-    name
-    champion
-    preset
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES + ATTR_ACCESSORS
-  end
+  attr_accessor :preset_format,
+                :num_teams,
+                :num_teams_per_group,
+                :num_advances_from_group
 
   ################
   #  VALIDATION  #

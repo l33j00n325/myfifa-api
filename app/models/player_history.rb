@@ -27,13 +27,6 @@ class PlayerHistory < ApplicationRecord
   validates :ovr, numericality: { only_integer: true }
   validates :value, numericality: { only_integer: true }
   validates :kit_no, numericality: { only_integer: true }, allow_nil: true
-  validate :player_changed?
-
-  def player_changed?
-    return unless ovr.blank? && value.blank?
-
-    errors.add(:base, :invalid)
-  end
 
   delegate :currently_on, to: :player
 

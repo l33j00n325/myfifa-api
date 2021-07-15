@@ -25,18 +25,6 @@ class Loan < ApplicationRecord
 
   belongs_to :player
 
-  PERMITTED_ATTRIBUTES = %i[
-    origin
-    destination
-    started_on
-    wage_percentage
-    returned
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   scope :active, -> { where(ended_on: nil) }
 
   ################
@@ -77,9 +65,7 @@ class Loan < ApplicationRecord
   delegate :update_status, to: :player
 
   def returned=(val)
-    return unless player_id && val
-
-    self.ended_on = team.currently_on
+    self.ended_on = team.currently_on if player_id && val
   end
 
   ###############
@@ -97,19 +83,11 @@ class Loan < ApplicationRecord
     ended_on.present?
   end
 
-  alias returned returned?
-
   def loaned_in?
     team.name == destination
   end
 
   def loaned_out?
     team.name == origin
-  end
-
-  def as_json(options = {})
-    options[:methods] ||= []
-    options[:methods] << :returned
-    super
   end
 end

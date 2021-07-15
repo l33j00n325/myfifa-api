@@ -20,22 +20,20 @@
 
 require 'rails_helper'
 
-RSpec.describe PlayerHistory, type: :model do
-
-  it "has a valid factory" do
-    expect(FactoryBot.create(:player_history)).to be_valid
+describe PlayerHistory, type: :model do
+  it 'has a valid factory' do
+    expect(create(:player_history)).to be_valid
   end
 
   it 'requires a datestamp' do
-    expect(FactoryBot.build(:player_history, recorded_on: nil)).to_not be_valid
+    expect(build(:player_history, recorded_on: nil)).not_to be_valid
   end
 
   it 'requires an overall rating' do
-    expect(FactoryBot.build(:player_history, ovr: nil)).to_not be_valid
+    expect(build(:player_history, ovr: nil)).not_to be_valid
   end
 
   it 'requires a value' do
-    expect(FactoryBot.build(:player_history, value: nil)).to_not be_valid
+    expect(build(:player_history, value: nil)).not_to be_valid
   end
-
 end

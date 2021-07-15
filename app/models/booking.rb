@@ -26,31 +26,13 @@ class Booking < ApplicationRecord
   belongs_to :match
   belongs_to :player, optional: true
 
-  PERMITTED_ATTRIBUTES = %i[
-    minute
-    player_name
-    player_id
-    red_card
-    home
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   validates :minute, inclusion: 1..120
   validates :player_name, presence: true
 
   before_validation :set_names
-  before_create :set_default_bools
 
   def set_names
     self.player_name = player.name if player_id.present?
-  end
-
-  def set_default_bools
-    self.red_card ||= false
-    self.home ||= false
   end
 
   delegate :team, to: :match

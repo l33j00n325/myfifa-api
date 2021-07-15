@@ -31,19 +31,6 @@ class TableRow < ApplicationRecord
 
   belongs_to :stage
 
-  PERMITTED_ATTRIBUTES = %i[
-    name
-    wins
-    draws
-    losses
-    goals_for
-    goals_against
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   validates :name, presence: true, on: :update
   validates :wins, presence: true
   validates :draws, presence: true
@@ -51,7 +38,7 @@ class TableRow < ApplicationRecord
   validates :goals_for, presence: true
   validates :goals_against, presence: true
 
-  delegate :team, :competition_id, to: :stage
+  delegate :team, to: :stage
 
   def goal_difference
     goals_for - goals_against
@@ -63,7 +50,7 @@ class TableRow < ApplicationRecord
 
   def as_json(options = {})
     options[:methods] ||= []
-    options[:methods] += %i[competition_id goal_difference points]
+    options[:methods] += %i[goal_difference points]
     super
   end
 end

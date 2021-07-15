@@ -26,106 +26,97 @@
 
 require 'rails_helper'
 
-RSpec.describe Goal, type: :model do
-  let(:goal) { FactoryBot.create(:goal) }
+describe Goal, type: :model do
+  let(:goal) { create(:goal) }
 
-  it "has a valid factory" do
+  it 'has a valid factory' do
     expect(goal).to be_valid
   end
 
-  it 'requires a valid minute' do
-    expect(FactoryBot.build(:goal, minute: nil)).to_not be_valid
-    expect(FactoryBot.build(:goal, minute: -1)).to_not be_valid
+  it 'requires a minute' do
+    expect(build(:goal, minute: nil)).not_to be_valid
   end
 
-  it 'requires a valid player name' do
-    expect(FactoryBot.build(:goal, player_name: nil)).to_not be_valid
+  it 'requires a player name' do
+    expect(build(:goal, player_name: nil)).not_to be_valid
   end
 
-  it 'requires a Cap for the player if player_id is present'
-
-  it 'increments appropriate score' do
-    @match = FactoryBot.create :match
-    home_goal = FactoryBot.create :home_goal, match: @match
-    expect(@match.score).to be == '1 - 0'
-
-    FactoryBot.create :away_goal, match: @match
-    expect(@match.score).to be == '1 - 1'
+  it 'increments home score if home' do
+    goal = create :home_goal
+    expect(goal.match.score).to be == '1 - 0'
   end
 
-  it 'increments opposite score if own goal' do
-    @match = FactoryBot.create :match
-    home_goal = FactoryBot.create :own_home_goal, match: @match
-    expect(@match.score).to be == '0 - 1'
+  it 'increments away score if away' do
+    goal = create :away_goal
+    expect(goal.match.score).to be == '0 - 1'
+  end
 
-    FactoryBot.create :own_away_goal, match: @match
-    expect(@match.score).to be == '1 - 1'
+  it 'increments away score if home own goal' do
+    goal = create :own_home_goal
+    expect(goal.match.score).to be == '0 - 1'
+  end
+
+  it 'increments home score if away own goal' do
+    goal = create :own_away_goal
+    expect(goal.match.score).to be == '1 - 0'
   end
 
   it 'automatically sets player name if player_id set' do
-    player = FactoryBot.create :player
-    player_goal = FactoryBot.create :goal, player_id: player.id
+    player = create :player
+    player_goal = create :goal, player_id: player.id
     expect(player_goal.player_name).to be == player.name
   end
 
   it 'changes player name if player_id changed' do
-    player = FactoryBot.create :player
-    player2 = FactoryBot.create :player, team: player.team
-    player_goal = FactoryBot.create :goal, player_id: player.id
+    player = create :player
+    player2 = create :player, team: player.team
+    player_goal = create :goal, player_id: player.id
     player_goal.update(player_id: player2.id)
     expect(player_goal.player_name).to be == player2.name
   end
 
   it 'automatically sets assisted by if assist_id set' do
-    player = FactoryBot.create :player
-    player_assist = FactoryBot.create :goal, assist_id: player.id
+    player = create :player
+    player_assist = create :goal, assist_id: player.id
     expect(player_assist.assisted_by).to be == player.name
   end
 
   it 'changes assisted by if assist_id changed' do
-    player = FactoryBot.create :player
-    player2 = FactoryBot.create :player, team: player.team
-    player_assist = FactoryBot.create :goal, assist_id: player.id
+    player = create :player
+    player2 = create :player, team: player.team
+    player_assist = create :goal, assist_id: player.id
     player_assist.update(assist_id: player2.id)
     expect(player_assist.assisted_by).to be == player2.name
   end
 
   it 'decrements score if goal is destroyed' do
-    @match = FactoryBot.create :match
-    goal = FactoryBot.create :home_goal, match: @match
+    match = create :match
+    goal = create :home_goal, match: match
     goal.destroy
-    expect(@match.reload.score).to be == '0 - 0'
+    expect(match.reload.score).to be == '0 - 0'
   end
 
-  it 'changes score if home/away is toggled' do
-    %i[home_goal away_goal own_home_goal own_away_goal].each do |goal_type|
-      goal = FactoryBot.create goal_type
-      score = goal.match.score
-      goal.toggle(:home) && goal.save
-      expect(goal.match.score).to be == score.reverse
-      goal.toggle(:home) && goal.save
-      expect(goal.match.score).to be == score
+  %i[home_goal away_goal own_home_goal own_away_goal].each do |goal_type|
+    describe "if #{goal_type}" do
+      let(:goal) { create goal_type }
+
+      it 'changes score if home/away is toggled' do
+        score = goal.match.score
+        goal.update(home: !goal.home)
+        expect(goal.match.score).to be == score.reverse
+      end
+
+      it 'changes score if own_goal is toggled' do
+        score = goal.match.score
+        goal.update(own_goal: !goal.own_goal)
+        expect(goal.match.score).to be == score.reverse
+      end
+
+      it 'does not change score if home/away and own_goal is toggled' do
+        score = goal.match.score
+        goal.update(home: !goal.home, own_goal: !goal.own_goal)
+        expect(goal.match.score).to be == score
+      end
     end
   end
-
-  it 'changes score if own_goal is toggled' do
-    %i[home_goal away_goal own_home_goal own_away_goal].each do |goal_type|
-      goal = FactoryBot.create goal_type
-      score = goal.match.score
-      goal.toggle(:own_goal) && goal.save
-      expect(goal.match.score).to be == score.reverse
-      goal.toggle(:own_goal) && goal.save
-      expect(goal.match.score).to be == score
-    end
-  end
-
-  it 'does not change score if home/away and own_goal is toggled' do
-    %i[home_goal away_goal own_home_goal own_away_goal].each do |goal_type|
-      goal = FactoryBot.create :home_goal
-      score = goal.match.score
-      goal.toggle(:home) && goal.toggle(:own_goal) && goal.save
-      expect(goal.match.score).to be == score
-    end
-  end
-
 end

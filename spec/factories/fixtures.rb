@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: fixtures
@@ -16,6 +18,8 @@
 
 FactoryBot.define do
   factory :fixture do
+    home_team { Faker::Team.name }
+    away_team { Faker::Team.name }
     stage
 
     transient do

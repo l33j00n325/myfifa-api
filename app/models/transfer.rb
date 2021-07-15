@@ -26,20 +26,6 @@ class Transfer < ApplicationRecord
 
   belongs_to :player
 
-  PERMITTED_ATTRIBUTES = %i[
-    signed_on
-    moved_on
-    origin
-    destination
-    fee
-    traded_player
-    addon_clause
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   ################
   #  VALIDATION  #
   ################

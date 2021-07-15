@@ -6,13 +6,14 @@
 #
 #  id          :bigint           not null, primary key
 #  away        :string
-#  away_score  :integer
+#  away_score  :integer          default(0)
 #  competition :string
 #  extra_time  :boolean          default(FALSE), not null
 #  friendly    :boolean          default(FALSE), not null
 #  home        :string
-#  home_score  :integer
+#  home_score  :integer          default(0)
 #  played_on   :date
+#  season      :integer
 #  stage       :string
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
@@ -35,21 +36,9 @@ class Match < ApplicationRecord
   has_many :caps, dependent: :destroy
   has_many :players, through: :caps
 
-  PERMITTED_ATTRIBUTES = %i[
-    home
-    away
-    played_on
-    competition
-    stage
-    friendly
-    extra_time
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
-  scope :with_players, -> { includes(caps: :player) }
+  accepts_nested_attributes_for :penalty_shootout,
+                                allow_destroy: true,
+                                update_only: true
 
   ################
   #  VALIDATION  #
@@ -69,16 +58,12 @@ class Match < ApplicationRecord
   #  CALLBACK  #
   ##############
 
-  before_validation :set_defaults
+  before_create :set_season
   after_save :increment_currently_on, if: :saved_change_to_played_on?
   after_save :set_cap_stop_times, if: :saved_change_to_extra_time?
 
-  def set_defaults
-    self.played_on ||= currently_on
-    self.home_score ||= 0
-    self.away_score ||= 0
-    self.extra_time ||= false
-    self.friendly ||= false
+  def set_season
+    self.season = ((played_on - team.started_on) / 365).to_i
   end
 
   def increment_currently_on
@@ -143,18 +128,11 @@ class Match < ApplicationRecord
     score
   end
 
-  def events
-    [*goals, *substitutions, *bookings].sort_by(&:minute)
-  end
-
   def as_json(options = {})
     options[:methods] ||= []
     options[:methods] += %i[
       score
-      team_score
-      other_score
       team_result
-      penalty_shootout
     ]
     super
   end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: fixtures
@@ -16,14 +18,14 @@
 
 require 'rails_helper'
 
-RSpec.describe Fixture, type: :model do
-  let(:fixture) { FactoryBot.create(:fixture) }
+describe Fixture, type: :model do
+  let(:fixture) { create(:fixture) }
 
   it 'has a valid factory' do
     expect(fixture).to be_valid
   end
 
   it 'requires at least one FixtureLeg' do
-    expect(FactoryBot.build(:fixture, legs_count: 0)).to_not be_valid
+    expect(build(:fixture, legs_count: 0)).not_to be_valid
   end
 end

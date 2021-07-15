@@ -35,26 +35,10 @@ class Goal < ApplicationRecord
              optional: true,
              inverse_of: :assists
 
-  PERMITTED_ATTRIBUTES = %i[
-    minute
-    player_name
-    player_id
-    assisted_by
-    assist_id
-    home
-    own_goal
-    penalty
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   validates :minute, inclusion: 1..120
   validates :player_name, presence: true
 
   before_validation :set_names
-  before_create :set_default_bools
   after_create :increment_score
   after_update :update_score, if: :score_changed?
   after_destroy :decrement_score
@@ -62,12 +46,6 @@ class Goal < ApplicationRecord
   def set_names
     self.player_name = reload_player.name if player_id.present?
     self.assisted_by = reload_assisting_player.name if assist_id.present?
-  end
-
-  def set_default_bools
-    self.home ||= false
-    self.own_goal ||= false
-    self.penalty ||= false
   end
 
   def increment_score
@@ -105,8 +83,4 @@ class Goal < ApplicationRecord
   end
 
   delegate :team, to: :match
-
-  def away?
-    !home?
-  end
 end

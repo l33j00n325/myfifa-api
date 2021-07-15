@@ -35,6 +35,11 @@ gem 'doorkeeper'
 
 gem 'cancancan'
 
+# GraphQL
+gem 'graphql'
+
+gem 'ar_lazy_preload'
+
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
@@ -49,6 +54,9 @@ group :development, :test do
 
   gem 'factory_bot_rails'
   gem 'faker'
+
+  gem 'rspec-graphql_matchers'
+  gem 'rspec-graphql_response'
   gem 'rspec-rails'
 
   gem 'annotate', require: false
@@ -66,6 +74,7 @@ group :test do
 end
 
 group :development do
+  gem 'graphiql-rails'
   gem 'listen', '~> 3.0.5'
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'

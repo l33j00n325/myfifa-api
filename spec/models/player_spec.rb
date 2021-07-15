@@ -26,44 +26,35 @@
 
 require 'rails_helper'
 
-RSpec.describe Player, type: :model do
-  let(:player) { FactoryBot.create(:player) }
+describe Player, type: :model do
+  let(:player) { create(:player) }
 
-  it "has a valid factory" do
+  it 'has a valid factory' do
     expect(player).to be_valid
   end
 
   it 'requires a name' do
-    expect(FactoryBot.build(:player, name: nil)).to_not be_valid
+    expect(build(:player, name: nil)).not_to be_valid
   end
 
-  it 'requires a valid position' do
-    expect(FactoryBot.build(:player, pos: nil)).to_not be_valid
-    expect(FactoryBot.build(:player, pos: 'GKK')).to_not be_valid
+  it 'requires a position' do
+    expect(build(:player, pos: nil)).not_to be_valid
   end
 
-  it 'requires an valid OVR' do
-    expect(FactoryBot.build(:player, ovr: nil)).to_not be_valid
-    expect(FactoryBot.build(:player, ovr: -1)).to_not be_valid
+  it 'requires an OVR' do
+    expect(build(:player, ovr: nil)).not_to be_valid
   end
 
-  it 'requires a valid value' do
-    expect(FactoryBot.build(:player, value: nil)).to_not be_valid
-    expect(FactoryBot.build(:player, value: -1)).to_not be_valid
+  it 'requires a value' do
+    expect(build(:player, value: nil)).not_to be_valid
   end
 
   it 'requires a birth year' do
-    expect(FactoryBot.build(:player, birth_year: nil)).to_not be_valid
-    expect(FactoryBot.build(:player, value: -1)).to_not be_valid
+    expect(build(:player, birth_year: nil)).not_to be_valid
   end
 
   it 'requires all secondary positions to be valid' do
-    sec_pos = []
-    3.times do
-      sec_pos << Player::POSITIONS.sample
-    end
-    expect(FactoryBot.build(:player, sec_pos: [''])).to_not be_valid
-    expect(FactoryBot.build(:player, sec_pos: sec_pos)).to be_valid
+    expect(build(:player, sec_pos: [''])).not_to be_valid
   end
 
   it 'starts with a history record' do
@@ -73,22 +64,45 @@ RSpec.describe Player, type: :model do
   it 'sets birth_year automatically if age is provided' do
     player.birth_year = nil
     player.age = player.team.currently_on.year - player.birth_year_was
-    expect(player.birth_year_changed?).to be_falsey
+    expect(player.birth_year).to be == player.birth_year_was
   end
 
-  it 'records attribute changes in history' do
-    player.team.increment_date(1.day)
+  it 'sets age based on team date and birth year' do
+    expected_age = Faker::Number.within(range: 18..30)
+    player.birth_year = player.team.currently_on.year - expected_age
+    expect(player.age).to be == expected_age
+  end
 
-    player.ovr += 1
-    player.save!
-    player.histories.reload
-    expect(player.histories.length).to be == 2
-    expect(player.histories.last.ovr).to be == player.ovr
+  describe 'when ovr is changed' do
+    before do
+      player.team.increment_date(1.day)
+      player.update(ovr: player.ovr + 1)
+      player.histories.reload
+    end
 
-    player.value += 1_000_000
-    player.save!
-    player.histories.reload
-    expect(player.histories.length).to be == 2
-    expect(player.histories.last.value).to be == player.value
+    it 'creates new history record' do
+      expect(player.histories.length).to be == 2
+    end
+
+    it 'stores new ovr in history' do
+      expect(player.histories.last.ovr).to be == player.ovr
+    end
+  end
+
+  describe 'when ovr/value is changed on same date' do
+    before do
+      player.team.increment_date(1.day)
+      player.update(ovr: player.ovr + 1)
+      player.update(value: player.value + 1_000_000)
+      player.histories.reload
+    end
+
+    it 'does not create an extra history record' do
+      expect(player.histories.length).to be == 2
+    end
+
+    it 'stores new value in history' do
+      expect(player.histories.last.value).to be == player.value
+    end
   end
 end

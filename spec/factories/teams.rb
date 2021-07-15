@@ -22,7 +22,7 @@
 FactoryBot.define do
   factory :team do
     name { Faker::Team.name }
-    started_on { Time.now }
+    started_on { Time.zone.today }
     user
 
     before(:create) do |team|

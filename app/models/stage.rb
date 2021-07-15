@@ -26,38 +26,11 @@ class Stage < ApplicationRecord
   has_many :table_rows, dependent: :destroy
   has_many :fixtures, dependent: :destroy
 
-  PERMITTED_ATTRIBUTES = %i[
-    name
-    num_teams
-    num_fixtures
-    table
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   validates :name, presence: true
   validates :num_teams, numericality: { greater_than: 0 }
   validates :num_fixtures, numericality: { greater_than: 0 }, unless: :table?
 
-  after_initialize :set_default_name
-  before_create :set_default_bools
   after_create :create_items
-
-  def set_default_name
-    self.name ||=
-      case num_teams
-      when 8 then 'Quarter-Finals'
-      when 4 then 'Semi-Finals'
-      when 2 then 'Final'
-      else        "Round of #{num_teams}"
-      end
-  end
-
-  def set_default_bools
-    self.table ||= false
-  end
 
   def create_items
     if table?
@@ -71,17 +44,16 @@ class Stage < ApplicationRecord
     end
   end
 
-  delegate :team, to: :competition
-
-  def as_json(options = {})
-    options[:include] ||= []
-    options[:include] += [
-      fixtures: {
-        methods: %i[legs],
-        except: %i[created_at updated_at]
-      },
-      table_rows: { methods: %i[goal_difference points] }
-    ]
+  def num_teams=(val)
     super
+    self.name ||=
+      case num_teams
+      when 8 then 'Quarter-Finals'
+      when 4 then 'Semi-Finals'
+      when 2 then 'Final'
+      else "Round of #{num_teams}"
+      end
   end
+
+  delegate :team, to: :competition
 end

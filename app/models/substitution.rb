@@ -29,23 +29,9 @@ class Substitution < ApplicationRecord
   belongs_to :player
   belongs_to :replacement, class_name: 'Player'
 
-  PERMITTED_ATTRIBUTES = %i[
-    minute
-    player_name
-    player_id
-    replaced_by
-    replacement_id
-    injury
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   validates :minute, inclusion: 1..120
 
   before_validation :set_names
-  before_create :set_default_bools
   after_create :create_cap
   after_update :update_subbed_cap, if: :saved_change_to_player_id?
   after_update :update_sub_cap, if: :saved_change_to_replacement_id?
@@ -54,10 +40,6 @@ class Substitution < ApplicationRecord
   def set_names
     self.player_name = player.name if player_id.present?
     self.replaced_by = replacement.name if replacement_id.present?
-  end
-
-  def set_default_bools
-    self.injury ||= false
   end
 
   def create_cap
@@ -92,10 +74,6 @@ class Substitution < ApplicationRecord
 
   delegate :team, to: :match
 
-  def home
-    match.team_home?
-  end
-
   def subbed_cap
     match.caps.find_by(player_id: player_id)
   end
@@ -106,11 +84,5 @@ class Substitution < ApplicationRecord
 
   def match_stop
     match.extra_time? ? 120 : 90
-  end
-
-  def as_json(options = {})
-    options[:methods] ||= []
-    options[:methods] += %i[home]
-    super
   end
 end

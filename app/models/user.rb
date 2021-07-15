@@ -35,25 +35,10 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
 
-  PERMITTED_ATTRIBUTES = %i[
-    email
-    full_name
-    username
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   has_many :teams, dependent: :destroy
 
   validates :username,
             length: { minimum: 6 },
             uniqueness: { case_sensitive: false }
-
-  before_create :set_default_bools
-
-  def set_default_bools
-    self.admin ||= false
-  end
+  validates :password_confirmation, presence: true, if: :password_required?
 end

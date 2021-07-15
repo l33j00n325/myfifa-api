@@ -8,13 +8,12 @@ AllCops:
   TargetRubyVersion: 2.7
   NewCops: enable
   Exclude:
-    - 'bin/*'
-    - 'config/**/*'
-    - 'db/**/*'
-    - 'lib/tasks/*'
-    - 'script/**/*'
-    - 'spec/**/*.rb'
-    - 'vendor/**/*'
+    - bin/*
+    - config/**/*
+    - db/**/*
+    - lib/tasks/*
+    - script/**/*
+    - vendor/**/*
 
 Layout/EmptyLinesAroundAttributeAccessor:
   Enabled: true
@@ -32,8 +31,20 @@ Lint/RaiseException:
   Enabled: true
 Lint/StructNewOverride:
   Enabled: true
-Rails/LexicallyScopedActionFilter:
+Metrics/AbcSize:
+  Exclude:
+    - app/graphql/mutations/add_mutations.rb
+Metrics/ClassLength:
   Enabled: false
+Metrics/MethodLength:
+  CountAsOne: ['array', 'hash']
+  Exclude:
+    - app/controllers/graphql_controller.rb
+    - app/graphql/mutations/add_mutations.rb
+Metrics/BlockLength:
+  CountAsOne: ['array', 'hash']
+  Exclude:
+    - app/graphql/mutations/add_mutations.rb
 Style/Documentation:
   Enabled: false
 Style/ExponentialNotation:
@@ -62,12 +73,3 @@ Style/HashTransformKeys:
   Enabled: true
 Style/HashTransformValues:
   Enabled: true
-# Metrics/AbcSize:
-#   Enabled: false
-Metrics/ClassLength:
-  Enabled: false
-# Metrics/MethodLength:
-#   Enabled: false
-Metrics/BlockLength:
-  Exclude:
-    - 'spec/**/*.rb'

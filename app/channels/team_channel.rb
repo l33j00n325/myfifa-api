@@ -3,7 +3,8 @@
 class TeamChannel < ApplicationCable::Channel
   def subscribed
     reject unless current_user
-    team = Team.find(params[:id])
+    current_ability = Ability.new(current_user)
+    team = Team.accessible_by(current_ability).find(params[:id])
     stream_for team
   end
 end

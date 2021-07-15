@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: fixture_legs
@@ -16,8 +18,8 @@
 
 FactoryBot.define do
   factory :fixture_leg do
-    home_score { Faker::Number.between(from: 0, to: 3) }
-    away_score { Faker::Number.between(from: 0, to: 3) }
+    home_score { Faker::Number.between(from: 0, to: 3).to_i.to_s }
+    away_score { Faker::Number.between(from: 0, to: 3).to_i.to_s }
     fixture
   end
 end

@@ -25,7 +25,7 @@ FactoryBot.define do
   factory :transfer do
     origin { Faker::Team.unique.name }
     destination { Faker::Team.unique.name }
-    moved_on { Faker::Date.between(from: Date.today, to: 60.days.from_now) }
+    moved_on { Faker::Date.between(from: Time.zone.today, to: 60.days.from_now) }
     player
   end
 end

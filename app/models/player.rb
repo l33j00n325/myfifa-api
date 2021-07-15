@@ -78,22 +78,6 @@ class Player < ApplicationRecord
     LW
   ].freeze
 
-  PERMITTED_ATTRIBUTES = %i[
-    name
-    nationality
-    pos
-    ovr
-    value
-    kit_no
-    birth_year
-    youth
-    age
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
   ################
   #  VALIDATION  #
   ################
@@ -122,15 +106,10 @@ class Player < ApplicationRecord
   ##############
 
   before_save :set_kit_no, if: :status_changed?
-  before_create :set_default_bools
   after_create :save_history
   after_update :update_history
   after_update :end_pending_injuries, unless: :injured?
   after_update :set_contract_conclusion, if: :saved_change_to_status?
-
-  def set_default_bools
-    self.youth ||= false
-  end
 
   def set_kit_no
     self.kit_no = nil if status.blank? || loaned?
@@ -143,10 +122,7 @@ class Player < ApplicationRecord
   end
 
   def update_history
-    if saved_change_to_ovr? ||
-       saved_change_to_value?
-      save_history
-    end
+    save_history if saved_change_to_ovr? || saved_change_to_value?
   end
 
   def end_pending_injuries
@@ -174,9 +150,7 @@ class Player < ApplicationRecord
   end
 
   def age=(val)
-    return if team.nil?
-
-    self[:birth_year] = team.currently_on.year - val.to_i
+    self[:birth_year] = team.currently_on.year - val.to_i if team.present?
   end
 
   ###############
@@ -191,7 +165,7 @@ class Player < ApplicationRecord
     end
   end
 
-  %w[contract injury loan transfer].each do |record|
+  %w[contract injury loan].each do |record|
     define_method "last_#{record}" do
       public_send(record.pluralize).last
     end
@@ -206,13 +180,9 @@ class Player < ApplicationRecord
     currently_on.year - birth_year
   end
 
-  def pos_idx
-    POSITIONS.index pos
-  end
-
   def as_json(options = {})
     options[:methods] ||= []
-    options[:methods] += %i[age pos_idx]
+    options[:methods] += %i[age]
     super
   end
 end

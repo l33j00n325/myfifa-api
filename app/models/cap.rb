@@ -7,8 +7,8 @@
 #  id         :bigint           not null, primary key
 #  pos        :string
 #  rating     :integer
-#  start      :integer
-#  stop       :integer
+#  start      :integer          default(0)
+#  stop       :integer          default(90)
 #  subbed_out :boolean          default(FALSE), not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
@@ -57,22 +57,6 @@ class Cap < ApplicationRecord
     RW
   ].freeze
 
-  PERMITTED_ATTRIBUTES = %i[
-    player_id
-    rating
-    pos
-  ].freeze
-
-  def self.permitted_attributes
-    PERMITTED_ATTRIBUTES
-  end
-
-  scope :clean_sheets, lambda { |team|
-    joins(:match)
-      .where(matches: { away_score: 0, home: team.name })
-      .or(joins(:match).where(matches: { home_score: 0, away: team.name }))
-  }
-
   validates :start, inclusion: 0..120
   validates :stop,
             inclusion: 0..120,
@@ -85,13 +69,6 @@ class Cap < ApplicationRecord
   validates :rating, inclusion: 1..5, allow_nil: true
   validate :same_team?
   validate :active_player?, if: :player_id
-
-  after_initialize :set_defaults
-  before_create :set_default_bools
-
-  def set_default_bools
-    self.subbed_out ||= false
-  end
 
   def same_team?
     return if match_id.nil? ||
@@ -108,11 +85,6 @@ class Cap < ApplicationRecord
   end
 
   after_destroy :remove_events
-
-  def set_defaults
-    self.start ||= 0
-    self.stop ||= 90
-  end
 
   def remove_events
     goals.destroy_all
@@ -142,11 +114,5 @@ class Cap < ApplicationRecord
     Substitution.where(match_id: match_id, replacement_id: player_id)
   end
 
-  delegate :team, :name, to: :player
-
-  def as_json(options = {})
-    options[:methods] ||= []
-    options[:methods] << :name
-    super
-  end
+  delegate :team, to: :player
 end

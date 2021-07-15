@@ -27,7 +27,11 @@ FactoryBot.define do
     before :create do |squad, evaluator|
       Cap::POSITIONS.dup.sample(evaluator.players_count).each do |pos|
         player = create :player, team: squad.team
-        squad.squad_players << create(:squad_player, squad: squad, player: player, pos: pos)
+        squad_player = create :squad_player,
+                              squad: squad,
+                              player: player,
+                              pos: pos
+        squad.squad_players << squad_player
       end
     end
   end

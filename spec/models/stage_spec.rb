@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: stages
@@ -18,39 +20,57 @@
 
 require 'rails_helper'
 
-RSpec.describe Stage, type: :model do
-  let(:stage) { FactoryBot.create(:stage) }
+describe Stage, type: :model do
+  let(:stage) { create :stage }
 
   it 'has a valid factory' do
     expect(stage).to be_valid
   end
 
   it 'requires a num_team' do
-    expect(FactoryBot.build(:stage, num_teams: nil)).to_not be_valid
-    expect(FactoryBot.build(:stage, num_teams: Faker::Number.negative)).to_not be_valid
+    expect(build(:stage, num_teams: nil)).not_to be_valid
   end
 
   it 'requires a num_fixtures' do
-    expect(FactoryBot.build(:stage, num_fixtures: nil)).to_not be_valid
-    expect(FactoryBot.build(:stage, num_fixtures: Faker::Number.negative)).to_not be_valid
+    expect(build(:stage, num_fixtures: nil)).not_to be_valid
+  end
+
+  it 'sets default name to Quarter-Finals if 8 teams' do
+    expect(build(:stage, num_teams: 8).name).to be == 'Quarter-Finals'
+  end
+
+  it 'sets default name to Semi-Finals if 4 teams' do
+    expect(build(:stage, num_teams: 4).name).to be == 'Semi-Finals'
+  end
+
+  it 'sets default name to Final to 2 teams' do
+    expect(build(:stage, num_teams: 2).name).to be == 'Final'
   end
 
   it 'sets default name depending on number of teams' do
-    expect(Stage.new(num_teams: 8).name).to be == 'Quarter-Finals'
-    expect(Stage.new(num_teams: 4).name).to be == 'Semi-Finals'
-    expect(Stage.new(num_teams: 2).name).to be == 'Final'
     num_teams = Faker::Number.between(from: 9, to: 20)
-    expect(Stage.new(num_teams: num_teams).name).to be == "Round of #{num_teams}"
+    expect(build(:stage, num_teams: num_teams).name).to be == "Round of #{num_teams}"
   end
 
-  it 'creates table rows if table' do
-    stage = FactoryBot.create(:stage, table: true)
-    expect(stage.table_rows.size).to be == stage.num_teams
-    expect(stage.fixtures.size).to be == 0
+  describe 'if table' do
+    let(:stage) { create :stage, table: true }
+
+    it 'creates table rows' do
+      expect(stage.table_rows.size).to be == stage.num_teams
+    end
+
+    it 'does not create fixtures' do
+      expect(stage.fixtures.size).to be == 0
+    end
   end
 
-  it 'creates fixtures if round' do
-    expect(stage.table_rows.size).to be == 0
-    expect(stage.fixtures.size).to be == stage.num_fixtures
+  describe 'if round' do
+    it 'does not create table rows' do
+      expect(stage.table_rows.size).to be == 0
+    end
+
+    it 'creates fixtures' do
+      expect(stage.fixtures.size).to be == stage.num_fixtures
+    end
   end
 end

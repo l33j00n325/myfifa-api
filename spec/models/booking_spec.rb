@@ -22,30 +22,27 @@
 
 require 'rails_helper'
 
-RSpec.describe Booking, type: :model do
-  let(:booking) { FactoryBot.create(:booking) }
+describe Booking, type: :model do
+  let(:booking) { create(:booking) }
 
-  it "has a valid factory" do
+  it 'has a valid factory' do
     expect(booking).to be_valid
   end
 
-  it 'requires a valid minute' do
-    expect(FactoryBot.build(:booking, minute: nil)).to_not be_valid
-    expect(FactoryBot.build(:booking, minute: -1)).to_not be_valid
+  it 'requires a minute' do
+    expect(build(:booking, minute: nil)).not_to be_valid
   end
 
-  it 'requires a Cap for the player if player_id is present'
-
   it 'automatically sets player name if player_id set' do
-    player = FactoryBot.create(:player)
-    player_booking = FactoryBot.create :booking, player_id: player.id
+    player = create(:player)
+    player_booking = create :booking, player_id: player.id
     expect(player_booking.player_name).to be == player.name
   end
 
   it 'changes player name if player_id changed' do
-    player = FactoryBot.create :player
-    player2 = FactoryBot.create :player, team: player.team
-    player_booking = FactoryBot.create :booking, player_id: player.id
+    player = create :player
+    player2 = create :player, team: player.team
+    player_booking = create :booking, player_id: player.id
     player_booking.update(player_id: player2.id)
     expect(player_booking.player_name).to be == player2.name
   end
